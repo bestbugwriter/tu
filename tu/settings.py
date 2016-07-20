@@ -36,8 +36,8 @@ COOKIES_ENABLED=False
 DOWNLOAD_DELAY=1
 #USER_AGENT = "Mozilla/5.0 (X11; U; Linux; en-US) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.6"
 ITEM_PIPELINES = {
-	#'tu.pipelines.DuplicatesPipeline': 300,
-	#'tu.pipelines.JsonWriterPipeline': 300,
+	#'tu.pipelines.DuplicatesPipeline': 200,
+	'tu.pipelines.JsonWriterPipeline': 300,
 	'tu.pipelines.TuPipeline': 800,
 }
 

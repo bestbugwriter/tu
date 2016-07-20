@@ -15,12 +15,14 @@ import string
 class TuSpider(CrawlSpider):
 	name = "tu"
 	allowed_domains = ["58.com"]
-	start_urls = ('http://hz.58.com/binjiang/chuzu/',)
+	b = lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/"
+	start_urls = tuple([b(x) for x in range(0,2000)])
 
 	rules = (
-		Rule(SgmlLinkExtractor(allow=('hz.58.com/pinpaigongyu/', )), callback='parse_pp'),
+		Rule(SgmlLinkExtractor(allow=('hz.58.com/pinpaigongyu/.*', )), callback='parse_pp'),
 		Rule(SgmlLinkExtractor(allow=('short.58.com/', )), callback='parse_gold'),
 		Rule(SgmlLinkExtractor(allow=('jinpai.58.com/', )), callback='parse_gold'),
+		Rule(SgmlLinkExtractor(allow=('hz.58.com/zufang/.*', )), callback='parse_gold'),
 		)
 
 	def wash_data(self, data):
