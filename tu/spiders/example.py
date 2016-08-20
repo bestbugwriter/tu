@@ -16,7 +16,7 @@ class TuSpider(CrawlSpider):
 	name = "tu"
 	allowed_domains = ["58.com"]
 	b = lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/"
-	start_urls = tuple([b(x) for x in range(0,2000)])
+	start_urls = tuple([b(x) for x in range(0,1)])
 
 	rules = (
 		Rule(SgmlLinkExtractor(allow=('hz.58.com/pinpaigongyu/.*', )), callback='parse_pp'),
@@ -36,6 +36,7 @@ class TuSpider(CrawlSpider):
 		sel = Selector(response)
 		items = []
 		item = TuItem()
+
 		try:
 			l = sel.xpath('//ul[@class="house-primary-content"]/li[1]/div[@class="fl"]//text()').extract()
 			item['price'] = self.wash_data(''.join(l)).encode('utf8')
@@ -52,13 +53,20 @@ class TuSpider(CrawlSpider):
 			l = sel.xpath('//div[@class="fl tel cfff"]//text()').extract()
 			item['contact'] = self.wash_data(''.join(l)).encode('utf8')
 
+			l = sel.xpath('//img[@id="smainPic"]/@src')
+			#if len(l) > 0:
+			item['image_urls'] = l.extract()
+			item['images'] = l.re(r'[^/]*.[jpg|png|gif]$')
+			#print(item['image_urls'])
+
 			item['brief'] = sel.xpath('//h1[1]//text()').extract()[0].encode('utf-8')
 			item['link'] = response.url.encode('utf-8')
+
 			items.append(item)
 			#print(type(item))
 			#print(item)
 		except Exception as e:
-			print("xpath error" + str(e))
+			print("parse_gold: xpath error: " + str(e))
 			pass
 
 		return items
@@ -68,7 +76,7 @@ class TuSpider(CrawlSpider):
 		sel = Selector(response)
 		items = []
 		item = TuItem()
-		
+
 		try:
 			l = sel.xpath('//div[@class="house-title center cf"]/div[@class="detail_header"]//text()')
 			item['price'] = self.wash_data(''.join(l)).encode('utf8')
@@ -85,10 +93,16 @@ class TuSpider(CrawlSpider):
 			l = sel.xpath('//div[@class="detail_headercon"]/div[@class="phonenum"]//text()')
 			item['contact'] = self.wash_data(''.join(l)).encode('utf8')
 
+			l = sel.xpath('//div[@class="house-title-wrap"]/img/@src')
+			#if len(l) > 0:
+			item['image_urls'] = l.extract()
+			item['images'] = l.re(r'[^/]*.[jpg|png|gif]$')
+
 			item['brief'] = sel.xpath('//h2//text()').extract()[0].encode('utf8')
 			item['link'] = response.url.encode('utf-8')
 			items.append(item)
+
 		except Exception as e:
-			print("xpath error: " + str(e))
+			print("parse_pp: xpath error: " + str(e))
 			pass
 		return items

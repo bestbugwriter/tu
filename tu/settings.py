@@ -33,20 +33,23 @@ USER_AGENTS = [
 	"Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; fr) Presto/2.9.168 Version/11.52",
 	]
 COOKIES_ENABLED=False
-DOWNLOAD_DELAY=1
+DOWNLOAD_DELAY=0.3
 #USER_AGENT = "Mozilla/5.0 (X11; U; Linux; en-US) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.6"
 ITEM_PIPELINES = {
 	#'tu.pipelines.DuplicatesPipeline': 200,
-	'tu.pipelines.JsonWriterPipeline': 300,
+	'scrapy.pipelines.images.ImagesPipeline': 250,
+	#'tu.pipelines.JsonWriterPipeline': 300,
 	'tu.pipelines.TuPipeline': 800,
 }
 
+IMAGES_STORE = '/home/lpz/tuImage'
+IMAGES_EXPIRES = 90
 FEED_EXPORTERS = {
 	'csv': 'tu.exporter.TuCsvItemExporter',
 }
 #log的最低级别。可选的级别有: CRITICAL、 ERROR、WARNING、INFO、DEBUG。更多内容请查看 Logging 
 LOG_LEVEL = 'INFO'
-
+#CONCURRENT_REQUESTS_PER_SPIDER
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "Mozilla/5.0 (X11; Linux i686; U;) Gecko/20070322 Kazehakase/0.4.5"

@@ -17,4 +17,6 @@ class TuItem(Item):
 	link = Field()
 	config = Field()
 	contact = Field()
+	image_urls = Field()
+	images = Field()
 	pass

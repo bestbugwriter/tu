@@ -17,10 +17,10 @@ class DuplicatesPipeline(object):
 		self.ids_seen = set()
 
 	def process_item(self, item, spider):
-		if item['id'] in self.ids_seen:
-			raise DropItem("Duplicate item found: %s" % item)
+		if item['image_urls'] is None:
+			raise DropItem("none item found: %s" % item)
 		else:
-			self.ids_seen.add(item['id'])
+			#self.ids_seen.add(item['id'])
 			return item
 
 class JsonWriterPipeline(object):
@@ -37,6 +37,8 @@ class TuPipeline(object):
 		#name = 'jinpai.html'
 		self.outputHtml(item)
 		return item
+		
+	i = 0
 
 	def open_spider(self, spider):
 		self.f = codecs.open('jinpai.html', 'wb', 'utf-8')
@@ -56,12 +58,18 @@ class TuPipeline(object):
 		self.f.close()
 
 	def outputHtml(self, item):
-		self.f.write("<tr>")
-		self.f.write("<td>%s</td>" %item['price'])
-		self.f.write("<td>%s</td>" %item['houseType'])
-		self.f.write("<td>%s</td>" %item['location'])
-		self.f.write("<td>%s</td>" %item['config'])
-		self.f.write("<td>%s</td>" %item['contact'])
-		self.f.write("<td><a href=\"%s\">%s</a></td>" %(item['link'], item['brief']))
-		self.f.write("</tr>")	
+		try:
+			self.i = self.i + 1
+			self.f.write("<tr>")
+			self.f.write("<td>%d</td>" %self.i)
+			self.f.write("<td>%s</td>" %item['price'])
+			self.f.write("<td>%s</td>" %item['houseType'])
+			self.f.write("<td>%s</td>" %item['location'])
+			self.f.write("<td>%s</td>" %item['config'])
+			self.f.write("<td>%s</td>" %item['contact'])
+			self.f.write("<td><a href=\"%s\">%s</a></td>" %(item['link'], item['brief']))
+			self.f.write("<td><img width=\"100\" height=\"100\" src=\"%s\"></td>" %item['image_urls'][0])
+			self.f.write("</tr>")
+		except Exception as e:
+			print("TuPipeline: outputHtml: " + str(e))
 
