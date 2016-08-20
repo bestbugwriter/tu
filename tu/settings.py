@@ -40,6 +40,7 @@ ITEM_PIPELINES = {
 	'scrapy.pipelines.images.ImagesPipeline': 250,
 	#'tu.pipelines.JsonWriterPipeline': 300,
 	'tu.pipelines.TuPipeline': 800,
+	'tu.pipelines.MySQLPipeline': 900,
 }
 
 IMAGES_STORE = '/home/lpz/tuImage'

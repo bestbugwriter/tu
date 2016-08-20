@@ -15,8 +15,9 @@ import string
 class TuSpider(CrawlSpider):
 	name = "tu"
 	allowed_domains = ["58.com"]
-	b = lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/"
-	start_urls = tuple([b(x) for x in range(0,1)])
+	#ab = lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/"
+	#start_urls = [(lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/") for x in range(0,1)]
+	start_urls = ["http://hz.58.com/zufang/pn1/".encode('utf8'), "http://hz.58.com/zufang/pn2/".encode('utf8')]
 
 	rules = (
 		Rule(SgmlLinkExtractor(allow=('hz.58.com/pinpaigongyu/.*', )), callback='parse_pp'),
@@ -95,6 +96,7 @@ class TuSpider(CrawlSpider):
 
 			l = sel.xpath('//div[@class="house-title-wrap"]/img/@src')
 			#if len(l) > 0:
+			
 			item['image_urls'] = l.extract()
 			item['images'] = l.re(r'[^/]*.[jpg|png|gif]$')
 

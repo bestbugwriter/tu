@@ -1,9 +1,14 @@
+
 # -*- coding: utf-8 -*-
 
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+from twisted.enterprise import adbapi			  #导入twisted的包
+import MySQLdb
+import MySQLdb.cursors
+#import pymysql
 import json
 from scrapy.exceptions import DropItem
 import sys
@@ -73,3 +78,57 @@ class TuPipeline(object):
 		except Exception as e:
 			print("TuPipeline: outputHtml: " + str(e))
 
+
+
+
+class MySQLPipeline(object):
+	def __init__(self):							#初始化连接mysql的数据库相关信息
+		self.cur, self.conn = self.initDBTable()
+
+	insert = "insert into %s (price, houseType, location, brief, link, config, contact, image_urls) values (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")"
+	createTable = "create table %s (id int auto_increment not null primary key, price TEXT(512), houseType TEXT(512), location TEXT(512), brief TEXT(512), link TEXT(512), config TEXT(512), contact TEXT(512), image_urls TEXT(512))"
+
+	def initDBTable(self):
+		DBName = 'tu'
+		TableName = 'tu2'
+		conn = MySQLdb.connect(host='127.0.0.1',user='root',passwd='toor',db='mysql',charset='utf8')
+		cur = conn.cursor()
+		cur.execute("USE %s" %DBName)
+		print(cur.fetchall())
+		DB1 = (TableName,)
+		cur.execute('show tables')
+		aa = cur.fetchall()
+		print(DB1, aa)
+		if DB1 not in aa:
+			cur.execute(self.createTable %TableName)
+
+			cur.execute("ALTER DATABASE %s CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci" % DBName)
+			#cur.execute("ALTER TABLE %s CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)  
+			cur.execute("ALTER TABLE %s CHANGE title title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)
+			cur.execute("ALTER TABLE %s CHANGE content content VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)
+			
+		cur.execute("describe %s" %TableName)
+		print(cur.fetchall())
+		return cur, conn
+
+	# pipeline dafault function					#这个函数是pipeline默认调用的函数
+	def process_item(self, item, spider):
+		try:
+			self.cur.execute(self.insert %("tu2", item['price'], item['houseType'], item['location'], item['brief'], item['link'], item['config'], item['contact'], item['image_urls'][0]))
+			print("insert data success.")
+		except Exception as e:
+			print("MySQLPipeline: " + str(e))
+
+		return item
+
+	def close_spider(self, spider):
+		print("close mysql.")
+		self.cur.close()
+		self.conn.close()
+
+	# insert the data to databases				 #把数据插入到数据库中
+	def _conditional_insert(self, tx, item):
+		p=open('yeah.txt','a')
+		p.write(str(item["link"]))
+		sql = "insert into book values (%s, %s)"
+		tx.execute(sql,(item["title"][0:], item["link"][0:]))
