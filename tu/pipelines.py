@@ -85,8 +85,8 @@ class MySQLPipeline(object):
 	def __init__(self):							#初始化连接mysql的数据库相关信息
 		self.cur, self.conn = self.initDBTable()
 
-	insert = "insert into %s (price, houseType, location, brief, link, config, contact, image_urls) values (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")"
-	createTable = "create table %s (id int auto_increment not null primary key, price TEXT(512), houseType TEXT(512), location TEXT(512), brief TEXT(512), link TEXT(512), config TEXT(512), contact TEXT(512), image_urls TEXT(512))"
+	insert = 'insert into %s (price, houseType, location, brief, link, config, contact, image_urls) values (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")'
+	createTable = 'create table %s (id int auto_increment not null primary key, price TEXT(512), houseType TEXT(512), location TEXT(512), brief TEXT(512), link TEXT(512), config TEXT(512), contact TEXT(512), image_urls TEXT(512))'
 
 	def initDBTable(self):
 		DBName = 'tu'
@@ -101,7 +101,6 @@ class MySQLPipeline(object):
 		print(DB1, aa)
 		if DB1 not in aa:
 			cur.execute(self.createTable %TableName)
-
 			cur.execute("ALTER DATABASE %s CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci" % DBName)
 			#cur.execute("ALTER TABLE %s CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)  
 			cur.execute("ALTER TABLE %s CHANGE title title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)
@@ -115,6 +114,7 @@ class MySQLPipeline(object):
 	def process_item(self, item, spider):
 		try:
 			self.cur.execute(self.insert %("tu2", item['price'], item['houseType'], item['location'], item['brief'], item['link'], item['config'], item['contact'], item['image_urls'][0]))
+			self.conn.commit()
 			print("insert data success.")
 		except Exception as e:
 			print("MySQLPipeline: " + str(e))
