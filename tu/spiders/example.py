@@ -15,9 +15,8 @@ import string
 class TuSpider(CrawlSpider):
 	name = "tu"
 	allowed_domains = ["58.com"]
-	#ab = lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/"
-	#start_urls = [(lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/") for x in range(0,1)]
-	start_urls = ["http://hz.58.com/zufang/pn1/".encode('utf8'), "http://hz.58.com/zufang/pn2/".encode('utf8')]
+	b = lambda x: "http://hz.58.com/zufang/pn" + str(x) + "/"
+	start_urls = tuple([b(x) for x in range(0,1)])
 
 	rules = (
 		Rule(SgmlLinkExtractor(allow=('hz.58.com/pinpaigongyu/.*', )), callback='parse_pp'),

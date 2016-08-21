@@ -78,57 +78,64 @@ class TuPipeline(object):
 		except Exception as e:
 			print("TuPipeline: outputHtml: " + str(e))
 
-
-
-
 class MySQLPipeline(object):
-	def __init__(self):							#初始化连接mysql的数据库相关信息
-		self.cur, self.conn = self.initDBTable()
 
-	insert = 'insert into %s (price, houseType, location, brief, link, config, contact, image_urls) values (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")'
-	createTable = 'create table %s (id int auto_increment not null primary key, price TEXT(512), houseType TEXT(512), location TEXT(512), brief TEXT(512), link TEXT(512), config TEXT(512), contact TEXT(512), image_urls TEXT(512))'
+	insert = '''insert into %s (price, houseType, location, brief, link, config, contact, image_urls) 
+		values (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\")'''
+	
+	createDB = """create database if not exists %s"""
 
-	def initDBTable(self):
-		DBName = 'tu'
-		TableName = 'tu2'
+	deleteTable = """DROP TABLE IF EXISTS %s"""
+
+	createTable = '''create table if not exists %s (id int auto_increment not null primary key, 
+		price TEXT(512), houseType TEXT(512), location TEXT(512), brief TEXT(512), link TEXT(512), 
+		config TEXT(512), contact TEXT(512), image_urls TEXT(512))'''
+
+	DBCharacter = "ALTER DATABASE %s CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci"
+	tableTitleCharacter = "ALTER TABLE %s CHANGE title title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+	
+	tableContentCharacter = "ALTER TABLE %s CHANGE content content VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+	def initDBTable(self, DBName, TableName):
 		conn = MySQLdb.connect(host='127.0.0.1',user='root',passwd='toor',db='mysql',charset='utf8')
 		cur = conn.cursor()
-		cur.execute("USE %s" %DBName)
-		print(cur.fetchall())
-		DB1 = (TableName,)
-		cur.execute('show tables')
-		aa = cur.fetchall()
-		print(DB1, aa)
-		if DB1 not in aa:
-			cur.execute(self.createTable %TableName)
-			cur.execute("ALTER DATABASE %s CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci" % DBName)
-			#cur.execute("ALTER TABLE %s CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)  
-			cur.execute("ALTER TABLE %s CHANGE title title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)
-			cur.execute("ALTER TABLE %s CHANGE content content VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)
-			
+		#cur.execute(self.createDB % DBName)
+		cur.execute("USE %s" % DBName)
+		cur.execute(self.DBCharacter % DBName)
+
+		# drop table and rebuild
+		print("rebuild table.")
+		cur.execute(self.deleteTable % TableName)
+		cur.execute(self.createTable % TableName)
+
+		#code modfiy
+		print('modfiy code type.')
+		
+		#cur.execute("ALTER TABLE %s CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" % TableName)  
+		#cur.execute(self.tableTitleCharacter % TableName)
+		#cur.execute(self.tableContentCharacter % TableName)
+
+		print('describe table.')
 		cur.execute("describe %s" %TableName)
 		print(cur.fetchall())
 		return cur, conn
 
-	# pipeline dafault function					#这个函数是pipeline默认调用的函数
 	def process_item(self, item, spider):
 		try:
-			self.cur.execute(self.insert %("tu2", item['price'], item['houseType'], item['location'], item['brief'], item['link'], item['config'], item['contact'], item['image_urls'][0]))
-			self.conn.commit()
-			print("insert data success.")
+			self.cur.execute(self.insert %(self.TableName, item['price'], item['houseType'], item['location'], 
+				item['brief'], item['link'], item['config'], item['contact'], item['image_urls'][0]))
+			self.cur.connection.commit()
 		except Exception as e:
 			print("MySQLPipeline: " + str(e))
 
 		return item
 
+	def open_spider(self, spider):
+		self.DBname = 'tu'
+		self.TableName = "tu2"
+		self.cur, self.conn = self.initDBTable(self.DBname, self.TableName)
+
 	def close_spider(self, spider):
 		print("close mysql.")
 		self.cur.close()
 		self.conn.close()
-
-	# insert the data to databases				 #把数据插入到数据库中
-	def _conditional_insert(self, tx, item):
-		p=open('yeah.txt','a')
-		p.write(str(item["link"]))
-		sql = "insert into book values (%s, %s)"
-		tx.execute(sql,(item["title"][0:], item["link"][0:]))
